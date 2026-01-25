@@ -1,0 +1,25 @@
+serverAddr = "test.com"
+serverPort = 10000
+
+#auth token
+auth.token = "123456"
+
+#transport.tls.certFile = "client.crt"
+#transport.tls.keyFile = "client.key"
+#transport.tls.trustedCaFile = "ca.crt"
+
+
+log.to = "frpc.log"
+#trace, debug, info, warn, error
+log.level = "trace"
+log.maxDays = 30
+
+loginFailExit = false
+
+
+[[proxies]]
+name = "test"
+type = "tcp"
+localIP = "0.0.0.0"
+localPort = 5555
+remotePort = 15555

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#1a1a1a">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="编辑 FRP 配置文件"
+            android:textSize="20sp"
+            android:textColor="#ffffff"
+            android:textStyle="bold"/>
+
+        <Button
+            android:id="@+id/btn_files"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:text="文件管理"
+            android:textSize="14sp"
+            android:textColor="#ffffff"
+            android:background="#2a2a2a"
+            android:layout_marginEnd="10dp"/>
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="←"
+            android:textSize="20sp"
+            android:textColor="#ffffff"
+            android:background="#2a2a2a"/>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="16dp">
+
+        <EditText
+            android:id="@+id/et_config"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="400dp"
+            android:gravity="top"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:inputType="textMultiLine"
+            android:textColor="#ffffff"
+            android:textColorHint="#888888"
+            android:background="#2a2a2a"
+            android:padding="12dp"/>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="保存配置"
+        android:backgroundTint="#4CAF50"
+        android:textColor="#ffffff"/>
+
+</LinearLayout>

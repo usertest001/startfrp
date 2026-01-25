@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center_horizontal"
+    android:background="@android:color/white">
+
+    <!-- 应用图标 -->
+    <ImageView
+        android:id="@+id/ivAppIcon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@mipmap/ic_launcher_round"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 应用名称 -->
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp" />
+
+    <!-- 应用版本号 -->
+    <TextView
+        android:id="@+id/tvAppVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="版本: 1.0.0"
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginBottom="10dp" />
+
+    <!-- 项目地址 -->
+    <TextView
+        android:id="@+id/tvProjectUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="https://github.com/usertest001/startfrp"
+        android:textSize="14sp"
+        android:textColor="@android:color/holo_blue_light"
+        android:layout_marginBottom="10dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- 作者信息 -->
+    <TextView
+        android:id="@+id/tvAuthor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="作者: yyx"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginBottom="30dp" />
+
+    <!-- 应用描述 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp">
+
+            <TextView
+                android:id="@+id/tvAppDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="FRP Client是一款用于在Android设备上运行FRP (Fast Reverse Proxy) 客户端的应用，支持通过Shizuku或普通方式启动FRP服务，实现内网穿透功能。"
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp" />
+
+            <!-- 功能特性 -->
+            <TextView
+                android:id="@+id/tvFeaturesTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="功能特性："
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:id="@+id/tvFeatures"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• 支持FRP客户端启动和管理\n• 提供Shizuku模式增强权限\n• 开机自启动功能\n• 后台运行配置\n• 无障碍服务保活\n• 电池优化设置"
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- 复制调试日志按钮 -->
+    <Button
+        android:id="@+id/btnCopyDebugLog"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="复制调试日志到下载目录"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:background="@android:color/holo_green_light"
+        android:textColor="@android:color/black"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp" />
+
+    <!-- 清空调试日志按钮 -->
+    <Button
+        android:id="@+id/btnClearDebugLog"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="清空调试日志"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:background="@android:color/holo_red_light"
+        android:textColor="@android:color/white"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp" />
+
+    <!-- 返回按钮 -->
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="返回"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="@android:color/white"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp" />
+
+</LinearLayout>

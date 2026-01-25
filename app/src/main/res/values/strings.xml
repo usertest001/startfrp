@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">FRP Client</string>
+    <!-- 内核版本号 -->
+    <string name="kernel_version">0.66.0</string>
+
+    <!-- 无障碍服务相关 -->
+    <string name="accessibility_service_description">StartFRP无障碍服务用于增强后台保活能力，无需额外操作，开启后自动运行</string>
+    <string name="enable_accessibility_service">开启无障碍服务增强保活</string>
+    <string name="accessibility_service_tip">开启无障碍服务可以显著提高应用在后台的存活能力</string>
+</resources>
