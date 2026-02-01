@@ -257,6 +257,12 @@ SOFTWARE.
 
 ## 📝 更新日志
 
+### v1.0.260201 (APK版本)
+- ✨ **版本更新**：更新到v1.0.260201版本
+- ✨ **界面颜色调整**：统一了按钮颜色，优化了视觉效果
+- ✨ **移除了未使用的代码**：清理了比亚迪车辆相关的无用代码，无byd系统签名，无法保证锁车后台运行，后续找方法实现
+- ✨ **优化了沉浸式状态栏实现**：确保状态栏正常显示
+
 ### v1.0.260125 (APK版本)
 - ✨ **正式发布第一个版本**：完整的FRP客户端功能
 - ✨ **全新的用户界面设计**：现代化、简洁美观的界面
@@ -276,7 +282,7 @@ SOFTWARE.
 
 - **项目地址**：[https://github.com/usertest001/startfrp](https://github.com/usertest001/startfrp)
 - **问题反馈**：请在GitHub Issues中提交问题
-- **开发者**： [yyx](https://github.com/usertest001/startfrp)
+- **开发者**： [yyx](https://github.com/usertest001/)
 
 ---
 

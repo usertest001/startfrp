@@ -29,6 +29,7 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
+
         // 初始化日志管理器
         logManager = LogManager.getInstance(this);
         

@@ -96,8 +96,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        // 隐藏ActionBar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         setContentView(R.layout.activity_main);
+
 
         // 初始化SharedPreferences
         sharedPreferences = getSharedPreferences("frp_config", Context.MODE_PRIVATE);
@@ -116,12 +120,7 @@ public class MainActivity extends AppCompatActivity {
             logManager.d("MainActivity", "Shizuku Binder dead");
         };
 
-        // 设置边缘到边缘
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
         
         // 应用excludeFromRecents设置
         boolean excludeFromRecents = sharedPreferences.getBoolean("exclude_from_recents", false);

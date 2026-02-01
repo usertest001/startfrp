@@ -55,6 +55,8 @@
         android:layout_height="48dp"
         android:text="启动FRP"
         android:textSize="16sp"
+        android:background="@color/primary"
+        android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/tvStatus"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnTools"
@@ -66,6 +68,8 @@
         android:layout_height="48dp"
         android:text="配置"
         android:textSize="14sp"
+        android:background="@color/primary_light"
+        android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/tvStatus"
         app:layout_constraintStart_toEndOf="@id/button"
         app:layout_constraintEnd_toStartOf="@id/btnAbout"
@@ -77,6 +81,8 @@
         android:layout_height="48dp"
         android:text="关于"
         android:textSize="14sp"
+        android:background="@color/primary_light"
+        android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/tvStatus"
         app:layout_constraintStart_toEndOf="@id/btnTools"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -147,6 +153,8 @@
             android:textSize="12sp"
             android:textAllCaps="false"
             android:gravity="center"
+            android:background="@color/secondary"
+            android:textColor="@color/white"
             android:layout_weight="1"
             android:layout_marginEnd="6dp" />
 
@@ -157,6 +165,8 @@
             android:text="安装Shizuku"
             android:textSize="12sp"
             android:textAllCaps="false"
+            android:background="@color/secondary"
+            android:textColor="@color/white"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp" />
@@ -167,6 +177,8 @@
             android:layout_height="40dp"
             android:text="电池优化"
             android:textSize="12sp"
+            android:background="@color/secondary"
+            android:textColor="@color/white"
             android:layout_weight="1"
             android:layout_marginStart="6dp" />
     </LinearLayout>
@@ -189,6 +201,8 @@
             android:text="启动守护进程"
             android:textSize="14sp"
             android:textAllCaps="false"
+            android:background="@color/primary"
+            android:textColor="@color/white"
             android:layout_marginEnd="8dp"
             android:layout_weight="1" />
 
@@ -199,6 +213,8 @@
             android:text="停止守护进程"
             android:textSize="14sp"
             android:textAllCaps="false"
+            android:background="@color/error"
+            android:textColor="@color/white"
             android:layout_marginStart="8dp"
             android:layout_weight="1" />
     </LinearLayout>
@@ -231,6 +247,8 @@
             android:text="复制日志"
             android:textSize="12sp"
             android:textAllCaps="false"
+            android:background="@color/secondary"
+            android:textColor="@color/white"
             android:paddingHorizontal="16dp"
             android:paddingVertical="4dp" />
     </LinearLayout>

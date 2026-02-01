@@ -70,7 +70,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="保存配置"
-        android:backgroundTint="#4CAF50"
+        android:background="#2a2a2a"
         android:textColor="#ffffff"/>
 
 </LinearLayout>

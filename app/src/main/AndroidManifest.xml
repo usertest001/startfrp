@@ -24,19 +24,7 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     
-    <!-- 比亚迪车辆相关权限 -->
-    <uses-permission android:name="com.byd.ditrainer.permission.CORE" />
-    <uses-permission android:name="android.permission.BYDAUTO_ENGINE_GET" />
-    <uses-permission android:name="android.permission.BYDAUTO_POWER_GET" />
-    <uses-permission android:name="android.permission.BYDAUTO_ADAS_GET" />
-    <uses-permission android:name="android.permission.BYDAUTO_VEHICLE_DATA_GET" />
-    <uses-permission android:name="android.permission.BYDAUTO_SETTING_GET" />
-    <uses-permission android:name="android.permission.BYDAUTO_NETWORK_GET" />
-    <uses-permission android:name="android.permission.BYDAUTO_NETWORK_SET" />
-    <uses-permission android:name="android.permission.BYDAUTO_SYSTEM_GET" />
-    <uses-permission android:name="android.permission.BYDAUTO_SYSTEM_SET" />
-    <uses-permission android:name="android.permission.BYDACQUISITION_SEND_BUFFER" />
-    <uses-permission android:name="android.permission.BYDACQUISITION_SEND_FILE" />
+
     
     <!-- 网络管理和电源优化相关权限 -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -108,78 +96,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- 车辆熄火检测广播接收器 -->
-        <receiver
-            android:name=".EngineOffReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <!-- 系统关机广播 -->
-                <action android:name="android.intent.action.SHUTDOWN" />
-                <!-- 系统重启广播 -->
-                <action android:name="android.intent.action.REBOOT" />
-                <!-- 系统重启广播（另一种形式） -->
-                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
-                <!-- 电源连接状态变化广播 -->
-                <action android:name="android.intent.action.POWER_DISCONNECTED" />
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-                <!-- 电池状态变化广播 -->
-                <action android:name="android.intent.action.BATTERY_CHANGED" />
-                <!-- 电池电量低广播 -->
-                <action android:name="android.intent.action.BATTERY_LOW" />
-                <!-- 比亚迪车机可能的自定义广播 -->
-                <action android:name="com.byd.action.ENGINE_OFF" />
-                <action android:name="com.byd.action.POWER_MODE_CHANGE" />
-                <action android:name="com.byd.action.VEHICLE_STATUS_CHANGE" />
-                <action android:name="com.byd.action.IGNITION_OFF" />
-                <!-- 比亚迪其他可能的自定义广播 -->
-                <action android:name="com.byd.car.action.ENGINE_OFF" />
-                <action android:name="com.byd.car.action.POWER_OFF" />
-                <action android:name="com.byd.car.action.IGNITION_OFF" />
-                <action android:name="com.byd.adas.action.ENGINE_OFF" />
-                <!-- 其他可能的车机自定义广播 -->
-                <action android:name="com.custom.action.ENGINE_OFF" />
-                <action android:name="com.custom.action.POWER_OFF" />
-                <action android:name="com.custom.action.IGNITION_OFF" />
-                <action android:name="com.custom.action.KEY_OFF" />
-                <!-- 通用车辆熄火广播 -->
-                <action android:name="com.android.car.action.ENGINE_OFF" />
-                <action android:name="com.android.car.action.POWER_OFF" />
-                
-                <!-- 比亚迪待机模式相关广播 -->
-                <action android:name="com.byd.action.STANDBY_MODE" />
-                <action android:name="com.byd.action.SLEEP_MODE" />
-                <action android:name="com.byd.action.LOW_POWER_MODE" />
-                <action android:name="com.byd.car.action.STANDBY" />
-                <action android:name="com.byd.car.action.SLEEP" />
-                <action android:name="com.byd.car.action.LOW_POWER" />
-                
-                <!-- 其他车机待机模式相关广播 -->
-                <action android:name="com.custom.action.STANDBY" />
-                <action android:name="com.custom.action.SLEEP" />
-                <action android:name="com.custom.action.LOW_POWER" />
-                
-                <!-- Android Car待机模式广播 -->
-                <action android:name="com.android.car.action.STANDBY" />
-                <action android:name="com.android.car.action.SLEEP" />
-                
-                <!-- 系统待机相关广播 -->
-                <action android:name="android.intent.action.SCREEN_OFF" />
-                <action android:name="android.intent.action.DEVICE_IDLE_MODE_CHANGED" />
-                <action android:name="android.intent.action.LOW_MEMORY" />
-                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
-                <!-- 应用状态变化相关广播 -->
-                <action android:name="android.intent.action.ACTION_CLOSE_SYSTEM_DIALOGS" />
-                <action android:name="android.intent.action.PACKAGE_RESTARTED" />
-                <action android:name="android.intent.action.PACKAGE_CHANGED" />
-                <data android:scheme="package" />
-                <!-- 任务相关广播 -->
-                <action android:name="android.intent.action.TASK_REMOVED" />
-                <action android:name="android.intent.action.RECENT_APPS_CLEARED" />
-                <!-- 进程状态相关广播 -->
-                <action android:name="android.intent.action.PROCESS_KILL" />
-            </intent-filter>
-        </receiver>
+
 
         <!-- 前台保活服务 -->
         <service
