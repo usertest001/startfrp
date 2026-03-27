@@ -15,6 +15,11 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.List;
 
+/**
+ * 文件列表适配器类
+ * 用于在Android应用中显示文件列表，支持文件路径复制和删除操作
+ * @author BY YYX
+ */
 public class FileListAdapter extends ArrayAdapter<File> {
     private static final String TAG = "FileListAdapter";
     private Context context;

@@ -25,6 +25,11 @@ import java.util.Locale;
 import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuRemoteProcess;
 
+/**
+ * FRP守护进程服务
+ * 用于监控和管理libfrpc进程的运行状态，确保其持续在线
+ * @author BY YYX
+ */
 public class FrpcDaemonService extends Service {
     
     // 服务相关常量

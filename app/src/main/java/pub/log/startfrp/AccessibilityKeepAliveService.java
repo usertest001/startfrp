@@ -9,6 +9,7 @@ import android.view.accessibility.AccessibilityEvent;
 /**
  * 无障碍保活服务
  * 用于增强应用在后台的存活能力
+ * @author BY YYX
  */
 public class AccessibilityKeepAliveService extends AccessibilityService {
     private static final String TAG = "AccessibilityKeepAliveService";

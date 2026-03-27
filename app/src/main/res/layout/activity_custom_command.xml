@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center_horizontal"
+    android:background="@android:color/white">
+
+    <!-- 标题 -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="自定义命令设置"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="30dp" />
+
+    <!-- 说明文本 -->
+    <TextView
+        android:id="@+id/tvDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="设置开机后自动执行的自定义命令，支持Shell命令"
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginBottom="20dp"
+        android:paddingHorizontal="20dp" />
+
+    <!-- 自定义命令输入框 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/tvCustomCommand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自定义命令"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp" />
+
+        <EditText
+            android:id="@+id/etCustomCommand"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:hint="请输入要执行的Shell命令，例如：echo 'Hello World'"
+            android:textSize="16sp"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:lines="4"
+            android:scrollHorizontally="false"
+            android:background="@android:drawable/editbox_background_normal"
+            android:padding="10dp" />
+    </LinearLayout>
+
+    <!-- 启用开关 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:layout_marginBottom="30dp">
+
+        <TextView
+            android:id="@+id/tvEnableCustomCommand"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="启用开机执行自定义命令"
+            android:textSize="16sp" />
+
+        <Switch
+            android:id="@+id/swEnableCustomCommand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false" />
+    </LinearLayout>
+
+    <!-- 保存按钮 -->
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="保存设置"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:background="@android:color/holo_green_light"
+        android:textColor="@android:color/black"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp" />
+
+    <!-- 返回按钮 -->
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="返回"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="@android:color/white"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp" />
+
+</LinearLayout>

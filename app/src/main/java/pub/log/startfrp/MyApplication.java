@@ -7,6 +7,11 @@ import android.util.Log;
 import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuProvider;
 
+/**
+ * 应用程序类
+ * 用于应用初始化时的设置，启用Shizuku多进程支持并检查Shizuku可用性
+ * @author BY YYX
+ */
 public class MyApplication extends Application {
     
     @Override

@@ -14,6 +14,7 @@ import java.util.Map;
  * 用于执行shell命令的线程类
  * 封装了进程执行逻辑，支持命令参数、工作目录和环境变量
  * 实现了输出流处理和错误流合并
+ * @author BY YYX
  */
 public class ShellThread extends Thread {
     private static final String TAG = "ShellThread";

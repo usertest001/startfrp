@@ -1,5 +1,7 @@
 package pub.log.startfrp;
 
+import android.content.Intent;
+import android.content.ComponentName;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.Manifest;
@@ -13,6 +15,11 @@ import java.io.File;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * 关于页面活动
+ * 显示应用版本信息、项目地址，提供复制和清空调试日志的功能
+ * @author BY YYX
+ */
 public class AboutActivity extends AppCompatActivity {
 
     private static final String TAG = "AboutActivity";
@@ -22,6 +29,8 @@ public class AboutActivity extends AppCompatActivity {
     private Button btnBack;
     private Button btnCopyDebugLog;
     private Button btnClearDebugLog;
+    private Button btnBydStartupManager;
+    private Button btnCustomCommand;
     private LogManager logManager;
 
     @Override
@@ -50,6 +59,8 @@ public class AboutActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnCopyDebugLog = findViewById(R.id.btnCopyDebugLog);
         btnClearDebugLog = findViewById(R.id.btnClearDebugLog);
+        btnBydStartupManager = findViewById(R.id.btnBydStartupManager);
+        btnCustomCommand = findViewById(R.id.btnCustomCommand);
     }
 
     /**
@@ -90,6 +101,26 @@ public class AboutActivity extends AppCompatActivity {
                 clearDebugLog();
             }
         });
+        
+        // 设置BYD后台启动项管理按钮点击事件
+        btnBydStartupManager.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logManager.d(TAG, "BYD后台启动项管理按钮被点击");
+                showBydStartupManager();
+            }
+        });
+        
+        // 设置自定义命令按钮点击事件
+        btnCustomCommand.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logManager.d(TAG, "自定义命令按钮被点击");
+                // 跳转到自定义设置页
+                Intent intent = new Intent(AboutActivity.this, CustomCommandActivity.class);
+                startActivity(intent);
+            }
+        });
     }
     
     /**
@@ -112,14 +143,6 @@ public class AboutActivity extends AppCompatActivity {
      * 复制调试日志到下载目录
      */
     private void copyDebugLog() {
-        // 检查存储权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
-                return;
-            }
-        }
-        
         new Thread(() -> {
             try {
                 // 获取日志文件路径
@@ -134,20 +157,45 @@ public class AboutActivity extends AppCompatActivity {
                     return;
                 }
                 
-                // 获取下载目录路径
-                File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                File targetFile = new File(downloadsDir, "startfrp_debug_log.txt");
-                
-                // 复制文件
-                if (copyFile(logFile, targetFile)) {
-                    runOnUiThread(() -> {
-                        showToast("调试日志已复制到下载目录");
-                        logManager.d(TAG, "调试日志已复制到: " + targetFile.getAbsolutePath());
-                    });
+                // 使用现代存储API保存到下载目录
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // Android 10+ 使用 MediaStore
+                    if (saveToDownloadsWithMediaStore(logFile)) {
+                        runOnUiThread(() -> {
+                            showToast("调试日志已复制到下载目录");
+                            logManager.d(TAG, "调试日志已复制到下载目录");
+                        });
+                    } else {
+                        runOnUiThread(() -> {
+                            showToast("复制调试日志失败");
+                        });
+                    }
                 } else {
-                    runOnUiThread(() -> {
-                        showToast("复制调试日志失败");
-                    });
+                    // Android 9及以下使用旧方法
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            runOnUiThread(() -> {
+                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION);
+                            });
+                            return;
+                        }
+                    }
+                    
+                    // 获取下载目录路径
+                    File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                    File targetFile = new File(downloadsDir, "startfrp_debug_log.txt");
+                    
+                    // 复制文件
+                    if (copyFile(logFile, targetFile)) {
+                        runOnUiThread(() -> {
+                            showToast("调试日志已复制到下载目录");
+                            logManager.d(TAG, "调试日志已复制到: " + targetFile.getAbsolutePath());
+                        });
+                    } else {
+                        runOnUiThread(() -> {
+                            showToast("复制调试日志失败");
+                        });
+                    }
                 }
             } catch (Exception e) {
                 logManager.e(TAG, "复制调试日志时出错: " + e.getMessage(), e);
@@ -156,6 +204,43 @@ public class AboutActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+    
+    /**
+     * 使用 MediaStore 保存文件到下载目录（Android 10+）
+     */
+    private boolean saveToDownloadsWithMediaStore(File sourceFile) {
+        try {
+            // 创建 ContentValues
+            android.content.ContentValues values = new android.content.ContentValues();
+            values.put(android.provider.MediaStore.Downloads.DISPLAY_NAME, "startfrp_debug_log.txt");
+            values.put(android.provider.MediaStore.Downloads.MIME_TYPE, "text/plain");
+            values.put(android.provider.MediaStore.Downloads.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS);
+            
+            // 插入到 MediaStore
+            android.content.ContentResolver resolver = getContentResolver();
+            android.net.Uri uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+            
+            if (uri != null) {
+                // 打开输出流并复制文件
+                java.io.OutputStream outputStream = resolver.openOutputStream(uri);
+                if (outputStream != null) {
+                    java.io.FileInputStream inputStream = new java.io.FileInputStream(sourceFile);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(buffer)) > 0) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                    inputStream.close();
+                    outputStream.close();
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            logManager.e(TAG, "使用MediaStore保存文件时出错: " + e.getMessage(), e);
+            return false;
+        }
     }
     
     /**
@@ -242,6 +327,28 @@ public class AboutActivity extends AppCompatActivity {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             tvAppVersion.setText("版本: 未知");
+        }
+    }
+    
+    /**
+     * 显示BYD后台启动项管理
+     */
+    private void showBydStartupManager() {
+        try {
+            logManager.d(TAG, "开始启动BYD后台启动项管理");
+            
+            // 使用Java Intent启动BYD应用启动管理
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("com.byd.appstartmanagement", 
+                "com.byd.appstartmanagement.frame.AppStartManagement"));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            
+            logManager.d(TAG, "已启动BYD后台启动项管理");
+            showToast("已启动BYD后台启动项管理");
+        } catch (Exception e) {
+            logManager.e(TAG, "BYD启动异常", e);
+            showToast("启动失败: " + e.getMessage());
         }
     }
 }

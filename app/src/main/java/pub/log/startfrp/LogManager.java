@@ -15,7 +15,8 @@ import java.util.Locale;
 
 /**
  * 日志管理工具类
- * 用于将日志保存到/data/local/tmp/startfrp/目录下的txt文件中
+ * 用于将日志保存到应用内部存储目录下的logs文件夹中，支持日志轮换和WakeLock管理
+ * @author BY YYX
  */
 public class LogManager {
 
@@ -37,8 +38,14 @@ public class LogManager {
         // 使用应用的内部存储目录，确保有写入权限
         this.logDir = context.getFilesDir().getAbsolutePath() + File.separator + "logs";
         
-        ensureLogDirectoryExists();
-        initializeWakeLock();
+        // 延迟初始化，避免阻塞调用线程
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ensureLogDirectoryExists();
+                initializeWakeLock();
+            }
+        }).start();
     }
     
     /**

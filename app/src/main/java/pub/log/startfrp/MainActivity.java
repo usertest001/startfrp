@@ -42,6 +42,8 @@ import androidx.core.view.WindowInsetsCompat;
 import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuRemoteProcess;
 
+import pub.log.startfrp.lib.adb.AdbManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,6 +55,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * 主活动类
+ * 应用的主界面，负责FRP服务的启动停止控制、模式切换、权限管理和日志显示
+ * @author BY YYX
+ */
 public class MainActivity extends AppCompatActivity {
 
     // UI组件
@@ -67,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private CheckBox cbExcludeFromRecents;
     private CheckBox cbAccessibilityService;
     private CheckBox cbUseShizuku;
+    private CheckBox cbUseAdb;
+    private CheckBox cbActivateShizukuOnBoot;
     private Button btnStartDaemon;
     private Button btnStopDaemon;
     
@@ -109,6 +118,9 @@ public class MainActivity extends AppCompatActivity {
         // 初始化日志管理器
         logManager = LogManager.getInstance(this);
         
+        // 初始化AdbManager
+        AdbManager.init(this);
+        
         // 初始化Shizuku监听器
         binderReceivedListener = () -> {
             logManager.d("MainActivity", "Shizuku Binder received");
@@ -148,8 +160,21 @@ public class MainActivity extends AppCompatActivity {
         Shizuku.addBinderReceivedListenerSticky(binderReceivedListener);
         Shizuku.addBinderDeadListener(binderDeadListener);
 
-        // 检查文件和状态
-        checkFilesAndStatus();
+        // 立即请求通知权限
+        requestNotificationPermission();
+        
+        // 立即启动StatusService，显示常驻通知
+        StatusService.startService(this);
+        logManager.d("MainActivity", "应用启动，立即启动StatusService显示常驻通知");
+        
+        // 延迟检查文件和状态，确保界面完全启动成功
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // 检查文件和状态
+                checkFilesAndStatus();
+            }
+        }, 2000); // 延迟2秒执行
     }
 
     @Override
@@ -163,6 +188,9 @@ public class MainActivity extends AppCompatActivity {
         
         // 更新用户意图为当前系统状态
         sharedPreferences.edit().putBoolean("accessibility_wanted", isAccessibilityEnabled).apply();
+        
+        // 检查通知权限
+        requestNotificationPermission();
         
         // 检查前台服务状态
         checkForegroundServiceStatus();
@@ -246,6 +274,49 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 更新模式复选框的状态，确保互斥
+     */
+    private void updateModeCheckboxesState() {
+        boolean useShizuku = sharedPreferences.getBoolean("use_shizuku", false);
+        boolean useAdb = sharedPreferences.getBoolean("use_adb", false);
+        
+        if (useShizuku) {
+            // Shizuku模式开启时，禁用ADB复选框
+            cbUseAdb.setEnabled(false);
+            cbUseShizuku.setEnabled(true);
+        } else if (useAdb) {
+            // ADB模式开启时，禁用Shizuku复选框
+            cbUseShizuku.setEnabled(false);
+            cbUseAdb.setEnabled(true);
+        } else {
+            // 两者都关闭时，都启用
+            cbUseShizuku.setEnabled(true);
+            cbUseAdb.setEnabled(true);
+        }
+    }
+    
+    /**
+     * 更新开机激活Shizuku复选框的状态
+     * 只有当开机启动和ADB模式都开启时，才能勾选此选项
+     */
+    private void updateActivateShizukuOnBootCheckboxState() {
+        boolean autoStart = sharedPreferences.getBoolean("auto_start", false);
+        boolean useAdb = sharedPreferences.getBoolean("use_adb", false);
+        boolean activateShizukuOnBoot = sharedPreferences.getBoolean("activate_shizuku_on_boot", false);
+        
+        if (autoStart && useAdb) {
+            cbActivateShizukuOnBoot.setEnabled(true);
+        } else {
+            cbActivateShizukuOnBoot.setEnabled(false);
+            if (activateShizukuOnBoot) {
+                // 如果当前是勾选状态，取消勾选
+                sharedPreferences.edit().putBoolean("activate_shizuku_on_boot", false).apply();
+                cbActivateShizukuOnBoot.setChecked(false);
+            }
+        }
+    }
+
     private void initViews() {
         logManager.d("MainActivity", "初始化UI组件");
 
@@ -256,6 +327,7 @@ public class MainActivity extends AppCompatActivity {
         tvStatus = findViewById(R.id.tvStatus);
         tvLogView = findViewById(R.id.tvLogView);
         Button btnCopyLog = findViewById(R.id.btnCopyLog);
+        Button btnClearLog = findViewById(R.id.btnClearLog);
         cbAutoStart = findViewById(R.id.cbAutoStart);
         btnBackgroundConfig = findViewById(R.id.btnBackgroundConfig);
         btnBatteryOptimization = findViewById(R.id.btnBatteryOptimization);
@@ -312,6 +384,16 @@ public class MainActivity extends AppCompatActivity {
                 copyLogToClipboard();
             }
         });
+        
+        // 设置清屏按钮点击事件
+        btnClearLog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logManager.d("MainActivity", "清屏按钮被点击");
+                tvLogView.setText("等待FRP启动...");
+                showToast("日志已清空");
+            }
+        });
 
         // 设置配置按钮点击事件
         btnTools.setOnClickListener(new View.OnClickListener() {
@@ -339,6 +421,7 @@ public class MainActivity extends AppCompatActivity {
         cbAutoStart.setOnCheckedChangeListener((buttonView, isChecked) -> {
             logManager.d("MainActivity", "开机自启动设置变更: " + (isChecked ? "开启" : "关闭"));
             sharedPreferences.edit().putBoolean("auto_start", isChecked).apply();
+            updateActivateShizukuOnBootCheckboxState();
             showToast(isChecked ? "已开启开机自启动" : "已关闭开机自启动");
             
             // 当开启开机自启动时，引导用户到系统设置界面开启自启动权限
@@ -394,10 +477,22 @@ public class MainActivity extends AppCompatActivity {
         
         // 初始化Shizuku复选框
         cbUseShizuku = findViewById(R.id.cbUseShizuku);
-        cbUseShizuku.setChecked(sharedPreferences.getBoolean("use_shizuku", false));
+        cbUseAdb = findViewById(R.id.cbUseAdb);
+        
+        // 读取保存的状态
+        boolean useShizuku = sharedPreferences.getBoolean("use_shizuku", false);
+        boolean useAdb = sharedPreferences.getBoolean("use_adb", false);
+        
+        // 设置初始状态
+        cbUseShizuku.setChecked(useShizuku);
+        cbUseAdb.setChecked(useAdb);
+        
+        // 初始化互斥状态
+        updateModeCheckboxesState();
+        
+        // 初始化Shizuku复选框监听器
         cbUseShizuku.setOnCheckedChangeListener((buttonView, isChecked) -> {
             logManager.d("MainActivity", "使用Shizuku设置变更: " + (isChecked ? "开启" : "关闭"));
-            sharedPreferences.edit().putBoolean("use_shizuku", isChecked).apply();
             
             if (isChecked) {
                 // 检查Shizuku是否可用
@@ -417,57 +512,134 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 
+                // 禁用ADB复选框
+                sharedPreferences.edit().putBoolean("use_shizuku", true).putBoolean("use_adb", false).apply();
+                cbUseAdb.setChecked(false);
+                updateModeCheckboxesState();
                 showToast("已开启Shizuku运行");
             } else {
+                sharedPreferences.edit().putBoolean("use_shizuku", false).apply();
+                updateModeCheckboxesState();
                 showToast("已关闭Shizuku运行");
             }
         });
+        
+        // 初始化ADB执行复选框监听器
+        cbUseAdb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            logManager.d("MainActivity", "使用ADB执行设置变更: " + (isChecked ? "开启" : "关闭"));
+            
+            if (isChecked) {
+                // 禁用Shizuku复选框
+                sharedPreferences.edit().putBoolean("use_adb", true).putBoolean("use_shizuku", false).apply();
+                cbUseShizuku.setChecked(false);
+                updateModeCheckboxesState();
+                updateActivateShizukuOnBootCheckboxState();
+                showToast("已开启ADB执行，将在执行命令时检查ADB连接状态");
+            } else {
+                sharedPreferences.edit().putBoolean("use_adb", false).apply();
+                updateModeCheckboxesState();
+                updateActivateShizukuOnBootCheckboxState();
+                showToast("已关闭ADB执行");
+            }
+        });
+        
+        // 初始化开机激活Shizuku复选框
+        cbActivateShizukuOnBoot = findViewById(R.id.cbActivateShizukuOnBoot);
+        boolean activateShizukuOnBoot = sharedPreferences.getBoolean("activate_shizuku_on_boot", false);
+        cbActivateShizukuOnBoot.setChecked(activateShizukuOnBoot);
+        
+        // 初始化开机激活Shizuku复选框监听器
+        cbActivateShizukuOnBoot.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            boolean autoStart = sharedPreferences.getBoolean("auto_start", false);
+            boolean adbMode = sharedPreferences.getBoolean("use_adb", false);
+            
+            if (isChecked && (!autoStart || !adbMode)) {
+                showToast("请先开启开机启动和ADB模式");
+                buttonView.setChecked(false);
+                return;
+            }
+            
+            logManager.d("MainActivity", "开机激活Shizuku设置变更: " + (isChecked ? "开启" : "关闭"));
+            sharedPreferences.edit().putBoolean("activate_shizuku_on_boot", isChecked).apply();
+            showToast(isChecked ? "已开启开机激活Shizuku" : "已关闭开机激活Shizuku");
+        });
+        
+        // 更新开机激活Shizuku复选框状态
+        updateActivateShizukuOnBootCheckboxState();
     }
 
     private void startFRPService() {
+        // 第一步：立即启动StatusService，确保通知立即显示
+        // 移到logManager调用之前，确保立即启动，不被LogManager初始化阻塞
+        StatusService.startService(this);
+        
+        // 第二步：记录日志
         logManager.d("MainActivity", "启动FRP服务");
+        logManager.d("MainActivity", "StatusService启动命令已发送");
 
-        // 检查并复制frp配置文件
-        String frpDir = getFrpDirPath();
-        File configFile = new File(frpDir, "frpc.toml");
+        // 第二步：检查通知权限
+        requestNotificationPermission();
 
-        if (!configFile.exists()) {
-            showToast("frpc.toml文件不存在，正在复制...");
-            boolean copied = copyAssetsToFrpDir();
-            if (!copied) {
-                showToast("文件复制失败");
-                return;
+        // 第三步：在后台线程检查并复制配置文件，避免阻塞UI和通知显示
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 检查并复制frp配置文件
+                String frpDir = getFrpDirPath();
+                File configFile = new File(frpDir, "frpc.toml");
+
+                if (!configFile.exists()) {
+                    runOnUiThread(() -> showToast("frpc.toml文件不存在，正在复制..."));
+                    boolean copied = copyAssetsToFrpDir();
+                    if (!copied) {
+                        runOnUiThread(() -> {
+                            showToast("文件复制失败");
+                            // 复制失败时停止StatusService
+                            StatusService.stopService(MainActivity.this);
+                        });
+                        return;
+                    }
+                }
+
+                // 配置文件检查完成后，启动FrpcService
+                Intent serviceIntent = new Intent(MainActivity.this, FrpcService.class);
+                serviceIntent.setAction(FrpcService.ACTION_START);
+                serviceIntent.putExtra("use_shizuku", cbUseShizuku.isChecked());
+                serviceIntent.putExtra("use_adb", cbUseAdb.isChecked());
+
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(serviceIntent);
+                    } else {
+                        startService(serviceIntent);
+                    }
+
+                    runOnUiThread(() -> {
+                        isRunning = true;
+                        updateUI();
+                        startLogUpdate();
+                        String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+                        updateLogView(timestamp + " FRP正在启动...");
+                    });
+                } catch (SecurityException e) {
+                    logManager.e("MainActivity", "启动服务安全异常: " + e.getMessage());
+                    runOnUiThread(() -> {
+                        String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+                        updateLogView(timestamp + " 启动失败：缺少必要权限");
+                        // 启动失败时停止StatusService
+                        StatusService.stopService(MainActivity.this);
+                    });
+                } catch (Exception e) {
+                    logManager.e("MainActivity", "启动服务失败: " + e.getMessage());
+                    runOnUiThread(() -> {
+                        String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+                        updateLogView(timestamp + " 启动失败: " + e.getMessage());
+                        // 启动失败时停止StatusService
+                        StatusService.stopService(MainActivity.this);
+                    });
+                }
             }
-        }
-
-        Intent serviceIntent = new Intent(this, FrpcService.class);
-        serviceIntent.setAction(FrpcService.ACTION_START);
-        serviceIntent.putExtra("use_shizuku", cbUseShizuku.isChecked());
-
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent);
-            } else {
-                startService(serviceIntent);
-            }
-
-            // 同时启动前台保活服务，确保显示常驻通知
-            StatusService.startService(this);
-
-            isRunning = true;
-            updateUI();
-            startLogUpdate();
-            String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-            updateLogView(timestamp + " FRP正在启动...");
-        } catch (SecurityException e) {
-            logManager.e("MainActivity", "启动服务安全异常: " + e.getMessage());
-            String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-            updateLogView(timestamp + " 启动失败：缺少必要权限");
-        } catch (Exception e) {
-            logManager.e("MainActivity", "启动服务失败: " + e.getMessage());
-            String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-            updateLogView(timestamp + " 启动失败: " + e.getMessage());
-        }
+        }).start();
     }
 
     /**
@@ -514,7 +686,7 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // 创建通知渠道
             NotificationChannelCompat channel = new NotificationChannelCompat.Builder(
-                    "frp_client_channel",  // 渠道ID
+                    "frpc_service_channel",  // 渠道ID
                     NotificationManagerCompat.IMPORTANCE_HIGH  // 重要性
             )
                     .setName("FRP Client通知")  // 渠道名称
@@ -533,10 +705,17 @@ public class MainActivity extends AppCompatActivity {
     private void requestNotificationPermission() {
         // Android 13+需要明确请求POST_NOTIFICATIONS权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            int permission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS);
+            logManager.d("MainActivity", "通知权限状态: " + permission);
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                logManager.d("MainActivity", "请求通知权限");
                 // 请求通知权限
                 requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_CODE);
+            } else {
+                logManager.d("MainActivity", "通知权限已授予");
             }
+        } else {
+            logManager.d("MainActivity", "Android版本低于13，不需要请求通知权限");
         }
     }
 
@@ -607,6 +786,10 @@ public class MainActivity extends AppCompatActivity {
         serviceIntent.setAction(FrpcService.ACTION_STOP);
         startService(serviceIntent);
 
+        // 确保StatusService继续运行，显示"FRP已停止"的通知
+        logManager.d("MainActivity", "确保StatusService继续运行，显示停止状态通知");
+        StatusService.startService(this);
+
         // 不直接调用stopService，避免在服务执行完停止逻辑之前就终止服务
         // 等待服务通过广播通知停止完成
         String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -624,6 +807,8 @@ public class MainActivity extends AppCompatActivity {
                         logManager.d("MainActivity", "超时检查：服务已停止，但UI显示运行中，强制更新UI");
                         isRunning = false;
                         updateUI();
+                        // 再次确保StatusService运行，显示停止状态
+                        StatusService.startService(MainActivity.this);
                     }
                 } else {
                     // 如果服务仍然在运行，尝试直接检查进程
@@ -880,6 +1065,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 检查ADB是否可用
+     */
+    private boolean isAdbAvailable() {
+        try {
+            // 使用AdbManager检查ADB连接状态
+            AdbManager adbManager = AdbManager.getInstance();
+            boolean connected = adbManager.connect();
+            if (connected) {
+                logManager.d("MainActivity", "ADB连接成功");
+                return true;
+            } else {
+                logManager.d("MainActivity", "ADB连接失败");
+                return false;
+            }
+        } catch (Exception e) {
+            logManager.e("MainActivity", "检查ADB可用性时发生错误: " + e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
      * 检查FRP进程状态
      */
     private void checkFRPProcessStatus() {
@@ -924,12 +1130,26 @@ public class MainActivity extends AppCompatActivity {
                     tvStatus.setText("FRP运行中");
                     tvStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
                     btnControl.setText("停止FRP");
-                    btnTools.setEnabled(false); // FRP运行时禁用配置按钮
+                    // FRP运行时禁用大部分配置按钮和复选框，但保持自启动和不显示按钮可用
+                    btnTools.setEnabled(false);
+                    cbAccessibilityService.setEnabled(false);
+                    cbUseShizuku.setEnabled(false);
+                    cbUseAdb.setEnabled(false);
+                    btnBackgroundConfig.setEnabled(false);
+                    btnInstallShizuku.setEnabled(false);
+                    btnBatteryOptimization.setEnabled(false);
                 } else {
                     tvStatus.setText("FRP已停止");
                     tvStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
                     btnControl.setText("启动FRP");
-                    btnTools.setEnabled(true); // FRP停止时启用配置按钮
+                    // FRP停止时启用所有配置按钮和复选框
+                    btnTools.setEnabled(true);
+                    cbAccessibilityService.setEnabled(true);
+                    // 根据当前模式状态更新模式复选框的可用性
+                    updateModeCheckboxesState();
+                    btnBackgroundConfig.setEnabled(true);
+                    btnInstallShizuku.setEnabled(true);
+                    btnBatteryOptimization.setEnabled(true);
                 }
             }
         });
@@ -989,6 +1209,10 @@ public class MainActivity extends AppCompatActivity {
         logManager.d("MainActivity", "FRP服务最终运行状态: " + isRunning);
         updateUI();
 
+        // 无论FRP是否运行，都启动StatusService显示通知
+        logManager.d("MainActivity", "启动StatusService显示通知");
+        StatusService.startService(this);
+        
         if (isRunning) {
             startLogUpdate();
         }
@@ -996,12 +1220,18 @@ public class MainActivity extends AppCompatActivity {
     
     /**
      * 检测系统中是否有FRP进程在运行
-     * 使用Shizuku执行命令来避免SELinux限制
+     * 根据用户选择的模式使用对应的方式执行命令来检测进程
      */
     private void checkFRPProcessInSystem() {
         try {
-            // 尝试使用Shizuku执行命令检测进程
-            if (Shizuku.pingBinder() && sharedPreferences.getBoolean("use_shizuku", false)) {
+            // 获取用户选择的模式
+            boolean useShizuku = sharedPreferences.getBoolean("use_shizuku", false);
+            boolean useAdb = sharedPreferences.getBoolean("use_adb", false);
+            
+            logManager.d("MainActivity", "用户选择的模式 - Shizuku: " + useShizuku + ", ADB: " + useAdb);
+            
+            // 1. 如果用户选择了Shizuku模式，使用Shizuku检测进程
+            if (useShizuku && Shizuku.pingBinder()) {
                 String checkCommand = "ps -A | grep libfrpc";
                 String[] command = {"sh", "-c", checkCommand};
                 
@@ -1040,12 +1270,179 @@ public class MainActivity extends AppCompatActivity {
                     logManager.d("MainActivity", "未检测到FRP进程，更新状态为停止");
                 }
                 
-            } else {
-                logManager.d("MainActivity", "Shizuku不可用或未启用，跳过进程检测");
+            } 
+            // 2. 如果用户选择了ADB模式，使用ADB检测进程
+            else if (useAdb) {
+                // 在后台线程上执行ADB操作，避免在主线程上执行网络操作
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            AdbManager adbManager = AdbManager.getInstance();
+                            
+                            // 尝试连接ADB服务器，最多尝试3次
+                            logManager.d("MainActivity", "尝试连接ADB服务器...");
+                            boolean isConnected = false;
+                            int maxAttempts = 3;
+                            for (int i = 0; i < maxAttempts; i++) {
+                                isConnected = adbManager.connect();
+                                logManager.d("MainActivity", "ADB连接尝试 " + (i + 1) + "/" + maxAttempts + ": " + isConnected);
+                                if (isConnected) {
+                                    break;
+                                }
+                                // 等待1秒后重试
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                }
+                            }
+                            
+                            logManager.d("MainActivity", "ADB连接最终状态: " + isConnected);
+                            
+                            if (!isConnected) {
+                                logManager.d("MainActivity", "ADB连接失败，无法检测进程");
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showToast("ADB连接失败，无法检测进程");
+                                    }
+                                });
+                                return;
+                            }
+                            
+                            // 执行进程检测命令
+                            String checkCommand = "ps -A | grep libfrpc";
+                            logManager.d("MainActivity", "使用ADB执行进程检测命令: " + checkCommand);
+                            
+                            String result = adbManager.executeCommand(checkCommand);
+                            logManager.d("MainActivity", "ADB检测进程结果: " + (result != null ? result : "无结果"));
+                            
+                            // 检查结果中是否包含libfrpc，过滤掉命令本身
+                            boolean foundProcess = false;
+                            if (result != null) {
+                                // 分割输出为行
+                                String[] lines = result.split("\\r?\\n");
+                                for (String line : lines) {
+                                    String trimmedLine = line.trim();
+                                    // 过滤空行和命令行
+                                    if (trimmedLine.isEmpty() || trimmedLine.contains("ps -A") || trimmedLine.contains("grep libfrpc")) {
+                                        continue;
+                                    }
+                                    // 检查是否包含进程信息
+                                    if (trimmedLine.contains("libfrpc") && trimmedLine.matches(".*\\s+\\d+\\s+.*")) {
+                                        foundProcess = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            final boolean finalFoundProcess = foundProcess;
+                            
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (finalFoundProcess) {
+                                        logManager.d("MainActivity", "ADB方式检测到frpc进程");
+                                        if (!isRunning) {
+                                            // 更新状态为运行中
+                                            isRunning = true;
+                                            FrpcService.isRunning = true;
+                                            logManager.d("MainActivity", "检测到FRP进程实际在运行，更新状态为运行中");
+                                            updateUI();
+                                        }
+                                        // 无论isRunning状态如何，只要检测到FRP进程在运行，就启动StatusService显示通知
+                                        logManager.d("MainActivity", "检测到FRP进程在运行，启动StatusService显示通知");
+                                        StatusService.startService(MainActivity.this);
+                                        logManager.d("MainActivity", "StatusService启动完成");
+                                    } else {
+                                        logManager.d("MainActivity", "ADB方式未检测到frpc进程");
+                                        if (isRunning) {
+                                            // 更新状态为停止
+                                            isRunning = false;
+                                            FrpcService.isRunning = false;
+                                            logManager.d("MainActivity", "未检测到FRP进程，更新状态为停止");
+                                            updateUI();
+                                        }
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            logManager.e("MainActivity", "ADB检测进程失败: " + e.getMessage(), e);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showToast("ADB检测进程失败: " + e.getMessage());
+                                }
+                            });
+                        }
+                    }
+                }).start();
+            }
+            // 3. 如果用户没有选择任何模式，使用默认方式检测进程
+            else {
+                checkFRPProcessWithDefaultMethod();
             }
         } catch (Exception e) {
             logManager.e("MainActivity", "检测进程失败: " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * 使用默认方式检测FRP进程
+     */
+    private void checkFRPProcessWithDefaultMethod() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String checkCommand = "ps -A | grep libfrpc";
+                    logManager.d("MainActivity", "使用默认方式执行进程检测命令: " + checkCommand);
+                    
+                    // 使用Runtime.exec执行命令
+                    Process process = Runtime.getRuntime().exec("sh -c " + checkCommand);
+                    InputStream inputStream = process.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                    
+                    String line;
+                    boolean foundProcess = false;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.contains("libfrpc")) {
+                            logManager.d("MainActivity", "默认方式检测到frpc进程: " + line.trim());
+                            foundProcess = true;
+                            break;
+                        }
+                    }
+                    
+                    reader.close();
+                    inputStream.close();
+                    
+                    int exitCode = process.waitFor();
+                    logManager.d("MainActivity", "默认方式命令执行完成，退出码: " + exitCode);
+                    
+                    final boolean finalFoundProcess = foundProcess;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (finalFoundProcess && !isRunning) {
+                                // 更新状态为运行中
+                                isRunning = true;
+                                FrpcService.isRunning = true;
+                                logManager.d("MainActivity", "检测到FRP进程实际在运行，更新状态为运行中");
+                                updateUI();
+                            } else if (!finalFoundProcess && isRunning) {
+                                // 更新状态为停止
+                                isRunning = false;
+                                FrpcService.isRunning = false;
+                                logManager.d("MainActivity", "未检测到FRP进程，更新状态为停止");
+                                updateUI();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    logManager.e("MainActivity", "默认方式检测进程失败: " + e.getMessage(), e);
+                }
+            }
+        }).start();
     }
 
     private void showDetailedStatus() {
@@ -1174,8 +1571,8 @@ public class MainActivity extends AppCompatActivity {
                 updateUI();
                 stopLogUpdate();
                 
-                // 停止前台保活服务，移除常驻通知
-                StatusService.stopService(MainActivity.this);
+                // 确保StatusService继续运行，显示"FRP已停止"的通知
+                StatusService.startService(MainActivity.this);
                 
                 String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
                 updateLogView(timestamp + " FRP服务已停止");

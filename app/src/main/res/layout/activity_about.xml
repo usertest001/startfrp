@@ -75,7 +75,7 @@
                 android:id="@+id/tvAppDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="FRP Client是一款用于在Android设备上运行FRP (Fast Reverse Proxy) 客户端的应用，支持通过Shizuku或普通方式启动FRP服务，实现内网穿透功能。"
+                android:text="StartFRP是一款专业的FRP (Fast Reverse Proxy) 客户端工具，专为Android设备打造。它可以在设备上稳定运行FRP服务，实现内网穿透功能，让您可以从外网安全访问本地设备或服务。\n\n应用采用先进的Shizuku激活方式，确保在各种Android版本上都能稳定运行，同时提供丰富的自启动和保活机制，保证服务持续在线。"
                 android:textSize="16sp"
                 android:lineSpacingExtra="4dp"
                 android:layout_marginBottom="20dp" />
@@ -85,7 +85,7 @@
                 android:id="@+id/tvFeaturesTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="功能特性："
+                android:text="核心功能："
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="10dp" />
@@ -94,7 +94,26 @@
                 android:id="@+id/tvFeatures"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="• 支持FRP客户端启动和管理\n• 提供Shizuku模式增强权限\n• 开机自启动功能\n• 后台运行配置\n• 无障碍服务保活\n• 电池优化设置"
+                android:text="• FRP客户端自动启动和管理\n• Shizuku模式增强权限支持\n• 开机自启动功能\n• 后台稳定运行配置\n• 无障碍服务保活机制\n• 电池优化设置\n• 详细的调试日志系统\n• 支持多种启动模式"
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp" />
+                
+            <!-- 技术特点 -->
+            <TextView
+                android:id="@+id/tvTechFeaturesTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="技术特点："
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:id="@+id/tvTechFeatures"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• 动态获取Shizuku路径，适应应用更新\n• 智能ADB命令执行和输出解析\n• 完善的错误处理机制\n• 低内存占用设计\n• 兼容Android 7.0+版本\n• 支持ARM64架构设备"
                 android:textSize="16sp"
                 android:lineSpacingExtra="4dp" />
         </LinearLayout>
@@ -122,6 +141,32 @@
         android:textSize="16sp"
         android:textAllCaps="false"
         android:background="@android:color/holo_red_light"
+        android:textColor="@android:color/white"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp" />
+
+    <!-- BYD后台启动项管理按钮 -->
+    <Button
+        android:id="@+id/btnBydStartupManager"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="BYD后台启动项管理"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:background="@android:color/holo_purple"
+        android:textColor="@android:color/white"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="10dp" />
+
+    <!-- 自定义命令按钮 -->
+    <Button
+        android:id="@+id/btnCustomCommand"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="自定义命令设置"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:background="@android:color/holo_orange_light"
         android:textColor="@android:color/white"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="10dp" />

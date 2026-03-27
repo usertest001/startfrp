@@ -24,6 +24,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 文件管理活动
+ * 用于管理FRP目录下的证书和密钥文件，支持文件上传、查看和删除操作
+ * @author BY YYX
+ */
 public class FileManagerActivity extends AppCompatActivity {
     private static final String TAG = "FileManagerActivity";
     private static final int PICK_FILE_REQUEST = 1;

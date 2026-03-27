@@ -16,6 +16,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+/**
+ * 配置编辑器活动
+ * 用于编辑FRP客户端配置文件，支持加载、保存配置和文件管理功能
+ * @author BY YYX
+ */
 public class ConfigEditorActivity extends AppCompatActivity {
     private static final String TAG = "ConfigEditorActivity";
     private EditText editTextConfig;
