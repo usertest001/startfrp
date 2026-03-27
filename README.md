@@ -38,6 +38,21 @@
 - ✅ 详细的日志查看和管理
 - ✅ 响应式布局，适配不同屏幕尺寸
 
+## 截图展示
+
+<div align="center">
+  <table>
+    <tr>
+      <td><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_1.jpg" alt="主界面" width="200"></td>
+      <td><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_2.jpg" alt="配置界面" width="200"></td>
+    </tr>
+    <tr>
+      <td><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_3.jpg" alt="日志界面" width="200"></td>
+      <td><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_4.jpg" alt="关于界面" width="200"></td>
+    </tr>
+  </table>
+</div>
+
 ## 系统要求
 
 - **Android版本**：6.0+（API 23+）
