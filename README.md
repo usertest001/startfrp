@@ -41,10 +41,10 @@
 ## 截图展示
 
 <div align="center">
-  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_1.jpg" alt="主界面" width="200"></p>
-  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_2.jpg" alt="配置界面" width="200"></p>
-  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_3.jpg" alt="日志界面" width="200"></p>
-  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_4.jpg" alt="关于界面" width="200"></p>
+  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_1.jpg" alt="主界面" style="max-width: 100%; height: auto;"></p>
+  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_2.jpg" alt="配置界面" style="max-width: 100%; height: auto;"></p>
+  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_3.jpg" alt="日志界面" style="max-width: 100%; height: auto;"></p>
+  <p><img src="https://github.com/usertest001/startfrp/blob/main/Screenshot/Screenshot_4.jpg" alt="关于界面" style="max-width: 100%; height: auto;"></p>
 </div>
 
 ## 系统要求
@@ -276,7 +276,7 @@ SOFTWARE.
 - ✨ **性能优化**：将StatusService的检测频率从2秒调整为30秒，降低系统开销
 - ✨ **ADB连接优化**：改进了ADB连接逻辑，使用现有连接池，与FRP启动保持一致
 - ✨ **日志文件优化**：优化了日志文件的读写性能，打开速度更快
-- ✨ **BYD车机专用**：本版本仅支持BYD车机使用
+- ✨ **BYD车机专用**：本版本ADB功能仅支持BYD车机使用
 
 ### v1.0.260201 (APK版本)
 - ✨ **版本更新**：更新到v1.0.260201版本
